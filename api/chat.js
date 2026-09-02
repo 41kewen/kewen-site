@@ -116,24 +116,29 @@ async function chatWithSearch(messages, persona) {
     }),
   });
   const data = await r.text();
-  const text = extractText(data);
+  let j;
+  try { j = JSON.parse(data); }
+  catch { throw new Error('non-json(status' + r.status + '):' + data.slice(0, 200)); }
+  const text = extractText(j);
   if (text) return text;
-  throw new Error('no_text(status' + r.status + '):' + data.slice(0, 200));
+  throw new Error('no_text(status' + r.status + ') output=' + JSON.stringify(j && j.output));
 }
 
-function extractText(data) {
-  let j;
-  try { j = JSON.parse(data); } catch { return ''; }
-  if (j && Array.isArray(j.output)) {
+function extractText(j) {
+  if (!j) return '';
+  if (Array.isArray(j.output)) {
     const msgs = j.output.filter((o) => o && (o.type === 'message' || o.type === 'messages'));
     const texts = [];
-    for (const m of msgs) if (m && Array.isArray(m.content))
-      for (const c of m.content) if (c && c.type === 'text' && c.text) texts.push(c.text);
+    for (const m of msgs) {
+      if (!m) continue;
+      if (typeof m.content === 'string') { if (m.content) texts.push(m.content); continue; }
+      if (Array.isArray(m.content)) for (const c of m.content) if (c && c.type === 'text' && c.text) texts.push(c.text);
+    }
     if (texts.length) return texts.join('\n').trim();
     const ot = j.output.filter((o) => o && o.type === 'output_text').map((o) => o.text || '').join('\n').trim();
     if (ot) return ot;
   }
-  if (j && Array.isArray(j.choices) && j.choices[0] && j.choices[0].message
+  if (Array.isArray(j.choices) && j.choices[0] && j.choices[0].message
       && typeof j.choices[0].message.content === 'string') {
     return j.choices[0].message.content.trim();
   }
@@ -161,8 +166,8 @@ export default async function handler(req, res) {
   const token = (body && typeof body.token === 'string') ? body.token : '';
   const username = await getUserFromToken(token);
 
-  // 佳代子是"老师的 AI 助手"，尝试联网查资料；七草荠纯角色扮演，不联网。
-  const allowSearch = character === 'kayoko';
+  // 两个角色（佳代子、七草荠）都联网补信息；搜不到时回退普通聊天，不坏。
+  const allowSearch = true;
 
   if (!Array.isArray(messages) || !messages.length) {
     res.status(400).json({ error: 'bad_request' });
