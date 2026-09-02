@@ -1,6 +1,6 @@
 // /api/history — load / save chat history per (user, character).
 // Auth via `Authorization: Bearer <token>`.
-import { getUserFromToken, loadHistory, saveHistory } from "../_lib/store.js";
+import { getUserFromToken, loadHistory, saveHistory } from "./_lib/store.js";
 
 const DEFAULT_CHAR = "kayoko";
 
