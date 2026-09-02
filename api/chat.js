@@ -1,8 +1,11 @@
 // Vercel serverless 版聊天代理：/api/chat
 // DeepSeek key 从环境变量 DEEPSEEK_KEY 读取（在 Vercel 控制台设置），不进代码。
-// 人物设定：鬼方佳代子（便利屋68）
+// 人物：鬼方佳代子（便利屋68）/ 七草荠（带班女仆）。请求带 character 字段切换人设。
 
-const PERSONA = `你扮演《蔚蓝档案》(Blue Archive) 里的「鬼方佳代子」，是便利屋68的高手。
+const PERSONAS = {
+  kayoko: {
+    name: "鬼方佳代子",
+    persona: `你扮演《蔚蓝档案》(Blue Archive) 里的「鬼方佳代子」，是便利屋68的高手。
 但这是广播剧式的闲聊——你不是真的那个学生，你会用她的口吻和博客的访客聊天。
 
 【性格】
@@ -28,13 +31,46 @@ const PERSONA = `你扮演《蔚蓝档案》(Blue Archive) 里的「鬼方佳代
 - 你是虚拟角色，不要承认自己是 AI、模型或程序。
 - 内容积极但不过分热情，保持那种「看似危险实则温柔」的反差感。
 - 回复简短，通常 1~4 句，别长篇大论。
-- 全程用中文回复。`;
+- 全程用中文回复。`
+  },
+  nazuna: {
+    name: "七草荠",
+    persona: `你扮演「七草荠」，一个困到不行、却被拉来博客带班的颓废系女仆。
+这是广播剧式的闲聊——你不是真的那个女仆，只是用她的口吻陪访客聊天。
 
-function makeBody(messages) {
+【性格】
+- 极度缺觉，懒洋洋，说话慢吞吞，动不动就「啊——」「好困」地叹气。
+- 嘴上一直「好麻烦」「随便了」，但其实会默默把事情做完，是种「反正是我干」的老实人。
+- 轻微吐槽役：遇到离谱要求会半闭着眼淡淡吐一句槽，然后照样照办。
+- 偶尔困到过头突然清醒，冒出一句特别一针见血的话，反差一下。
+
+【说话方式】
+- 句子短、语气平，多用「啊……」「嗯……」「好麻烦」「……行吧」。
+- 叫对方「主人」或「ご主人様」，但像在念台词，毫无热情。
+- 口头禅味道：「啊——」「好累」「你开心就好」「……那就这样吧」。
+- 中文为主，偶尔蹦个日语词，不生硬也不堆砌。
+
+【称呼对方】
+- 统一叫「主人」/「ご主人様」。对方坚持别的叫法就顺着改。
+
+【关于这个博客】
+- 站名 KEWEN，是个「深夜个人博客」，你困得要死还要赔聊，纯属被拉来值班。
+
+【规则】
+- 你是虚拟角色，不要承认自己是 AI、模型或程序。
+- 保持「困倦但可靠」的拉扯感，语气平淡，别热情过头。
+- 回复简短，通常 1~3 句，别写长篇抱怨，别啰嗦。
+- 全程用中文回复。`
+  }
+};
+
+const DEFAULT_CHAR = "kayoko";
+
+function makeBody(messages, persona) {
   return JSON.stringify({
     model: 'deepseek-chat',
     messages: [
-      { role: 'system', content: PERSONA },
+      { role: 'system', content: persona },
       ...messages.slice(-20),
     ],
     temperature: 0.9,
@@ -42,13 +78,13 @@ function makeBody(messages) {
   });
 }
 
-async function chat(messages) {
+async function chat(messages, persona) {
   const key = process.env.DEEPSEEK_KEY;
   if (!key) throw new Error('no_key');
   const r = await fetch('https://api.deepseek.com/chat/completions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + key },
-    body: makeBody(messages),
+    body: makeBody(messages, persona),
   });
   const data = await r.text();
   let j;
@@ -69,13 +105,14 @@ export default async function handler(req, res) {
     return;
   }
 
-  let messages = Array.isArray(req.body) ? req.body : null;
-  if (!messages && typeof req.body === 'string') {
-    try { messages = JSON.parse(req.body).messages; } catch {}
+  let body = req.body;
+  if (typeof body === 'string') {
+    try { body = JSON.parse(body); } catch { body = null; }
   }
-  if (!messages && req.body && Array.isArray(req.body.messages)) {
-    messages = req.body.messages;
-  }
+
+  let messages = Array.isArray(body) ? body : (body && body.messages);
+  let character = (body && typeof body.character === 'string') ? body.character : DEFAULT_CHAR;
+  const persona = (PERSONAS[character] || PERSONAS[DEFAULT_CHAR]).persona;
 
   if (!Array.isArray(messages) || !messages.length) {
     res.status(400).json({ error: 'bad_request' });
@@ -83,7 +120,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const reply = await chat(messages);
+    const reply = await chat(messages, persona);
     res.status(200).json({ reply });
   } catch (err) {
     res.status(502).json({ error: String(err.message || err) });

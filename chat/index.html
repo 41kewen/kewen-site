@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>和佳代子聊天 — KEWEN</title>
+<title>聊天 — KEWEN</title>
 <meta name="description" content="KEWEN — 深夜个人博客">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
 <link rel="icon" type="image/png" sizes="64x64" href="/assets/favicon-64.png">
@@ -152,22 +152,26 @@ td{color:var(--fg2)}
 hr{border:none;border-top:1px solid var(--line);margin:2.6rem 0}
 article.post img{border:1px solid var(--line)}
 /* about */
-.about-box{max-width:720px;margin:0 auto}
-.about-box h2{font-size:1.5rem;font-weight:400;letter-spacing:.2em;margin-bottom:.4rem}
-.about-box .about-kicker{font-family:var(--font-mono);color:var(--violet-bright);font-size:.74rem;letter-spacing:.3em;margin-bottom:1.6rem}
-.about-intro{color:var(--fg);font-size:1.02rem;line-height:1.9;margin:0 0 .8rem}
-.pile{display:flex;flex-wrap:wrap;align-items:center;gap:.2rem .8rem;max-width:720px;margin:2.2rem 0}
-.pile span{font-family:var(--font-mono);white-space:nowrap;display:inline-block}
-.pile .p1{font-size:clamp(1.7rem,5vw,2.7rem);color:var(--violet-bright);font-weight:700;letter-spacing:.02em;transform:rotate(-3.5deg) translateY(-10px)}
-.pile .p6{writing-mode:vertical-rl;font-size:1.05rem;color:var(--violet);letter-spacing:.3em;margin:-1.2rem .4rem 0 -.6rem;transform:rotate(4deg)}
-.pile .p2{font-size:clamp(1rem,2.6vw,1.4rem);color:var(--fg2);transform:rotate(2deg) translateY(12px);margin-left:-.3rem}
-.pile .p3{font-size:.78rem;color:var(--muted);letter-spacing:.24em;transform:rotate(-5deg) translateY(-4px);margin-left:1.8rem}
-.pile .p4{font-size:clamp(1.2rem,3vw,1.8rem);color:var(--fg2);font-style:italic;transform:rotate(-1deg) translateY(7px)}
-.pile .p9{font-size:clamp(.95rem,2.2vw,1.2rem);color:var(--fg2);text-decoration:line-through;text-decoration-color:var(--violet-dim);text-decoration-thickness:2px;transform:rotate(1.5deg) translateY(-13px);margin-left:-.8rem}
-.pile .p5{font-size:clamp(1.4rem,3.6vw,2.1rem);color:transparent;-webkit-text-stroke:1px var(--violet);letter-spacing:.26em;transform:rotate(-4deg) translateY(14px);margin-left:2rem}
-.pile .p7{font-size:clamp(1rem,2.6vw,1.35rem);color:var(--fg2);letter-spacing:.1em;transform:rotate(3deg) translateY(-7px);margin-left:-.5rem}
-.pile .p10{writing-mode:vertical-rl;font-size:1rem;color:var(--fg2);letter-spacing:.26em;border:1px solid var(--line);padding:.5rem .35rem;margin:.4rem 1.2rem 0 -.4rem;transform:rotate(-3deg);opacity:.85}
-.pile .p8{font-size:.95rem;color:var(--muted);letter-spacing:.42em;transform:rotate(-1.5deg) translateY(9px);margin-left:.6rem}
+.about-grid{display:grid;grid-template-columns:.95fr 1.05fr;gap:clamp(1.4rem,3.6vw,2.6rem);align-items:center;max-width:820px;margin:0 auto}
+.about-visual{position:relative;display:grid;place-items:center}
+.about-visual img{width:min(440px,94%);display:block;
+  -webkit-mask-image:linear-gradient(to bottom,#000 84%,transparent);
+  mask-image:linear-gradient(to bottom,#000 84%,transparent);
+  filter:contrast(1.03)}
+.about-frame{position:absolute;inset:5% 12%;border:1px solid var(--line);pointer-events:none}
+.about-frame::before,.about-frame::after{content:"";position:absolute;width:14px;height:14px;border-color:var(--violet);border-style:solid}
+.about-frame::before{top:-1px;left:-1px;border-width:1px 0 0 1px}
+.about-frame::after{bottom:-1px;right:-1px;border-width:0 1px 1px 0}
+.about-visual .stamp-tag{position:absolute;right:6%;bottom:9%;font-family:var(--font-mono);
+  font-size:.68rem;color:var(--violet-bright);letter-spacing:.28em;writing-mode:vertical-rl;opacity:.85}
+.id-card{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:1.6rem 1.7rem}
+.id-kicker{font-family:var(--font-mono);color:var(--violet-bright);font-size:.72rem;letter-spacing:.3em;margin-bottom:1rem}
+.id-intro{color:var(--fg2);font-size:1rem;line-height:1.85;margin-bottom:1.2rem}
+.id-table{display:flex;flex-direction:column;margin:0}
+.id-row{display:flex;gap:1rem;align-items:baseline;border-top:1px solid var(--line);padding:.55rem 0;font-size:.92rem}
+.id-row dt{flex:0 0 4.2em;color:var(--muted);font-family:var(--font-mono);letter-spacing:.1em}
+.id-row dd{margin:0;color:var(--fg);line-height:1.6}
+@media(max-width:640px){.about-grid{grid-template-columns:1fr}.about-visual{order:-1}.about-visual img{width:min(280px,72%)}}
 /* contact */
 .contact-list{display:grid;gap:1rem;max-width:720px;margin:0 auto}
 .contact-card{display:flex;align-items:center;gap:1.3rem;border:1px solid var(--line);
@@ -236,19 +240,26 @@ article.post img{border:1px solid var(--line)}
 .chat-status{font-size:.68rem;color:var(--muted);font-family:var(--font-mono);letter-spacing:.06em;margin-top:.15rem}
 .chat-status .dot{display:inline-block;width:6px;height:6px;border-radius:50%;
   background:#3ecf8e;margin-right:.35rem;box-shadow:0 0 6px #3ecf8e}
+.char-switch{display:flex;gap:.6rem;padding:.7rem 1rem;border-bottom:1px solid var(--line)}
+.char-tab{display:flex;align-items:center;gap:.5rem;padding:.35rem .7rem;border-radius:9px;
+  border:1px solid var(--line);background:none;color:var(--muted);cursor:pointer;
+  font-family:var(--font-mono);font-size:.8rem;letter-spacing:.04em;transition:all .2s}
+.char-tab img{width:26px;height:26px;border-radius:7px;object-fit:cover;border:1px solid var(--line)}
+.char-tab:hover{color:var(--fg)}
+.char-tab.on{color:var(--fg);border-color:var(--violet);background:rgba(126,43,214,.12)}
 .chat-log{min-height:52vh;max-height:60vh;overflow-y:auto;padding:1.1rem 1rem;
   display:flex;flex-direction:column;gap:.7rem}
 .chat-empty{color:var(--muted);font-size:.85rem;text-align:center;margin:auto;line-height:1.9}
 .msg{display:flex}
 .msg.me{justify-content:flex-end}
-.msg.kayo{justify-content:flex-start}
+.msg.bot{justify-content:flex-start}
 .bubble{max-width:78%;padding:.55rem .8rem;border-radius:12px;font-size:.9rem;
   line-height:1.6;white-space:pre-wrap;word-break:break-word;border:1px solid var(--line)}
 .msg.me .bubble{background:var(--violet);border-color:var(--violet);color:#fff;
   border-bottom-right-radius:3px}
-.msg.kayo .bubble{background:rgba(126,43,214,.08);border-color:var(--violet-dim);
+.msg.bot .bubble{background:rgba(126,43,214,.08);border-color:var(--violet-dim);
   color:var(--fg);border-bottom-left-radius:3px}
-.msg.kayo .bubble.spin{color:var(--muted)}
+.msg.bot .bubble.spin{color:var(--muted)}
 .chat-input{display:flex;gap:.6rem;padding:.7rem 1rem;border-top:1px solid var(--line)}
 .chat-input input{flex:1;background:none;border:1px solid var(--line);border-radius:9px;
   padding:.6rem .8rem;color:var(--fg);font-size:.9rem;font-family:var(--font-sans)}
@@ -282,13 +293,17 @@ article.post img{border:1px solid var(--line)}
 </header>
 <main>
 <section class="section chat-section">
-  <div class="section-head"><h2>和佳代子聊天</h2><span class="tag-count">便利屋68</span></div>
+  <div class="section-head"><h2>和她们聊天</h2><span class="tag-count">2 位看板娘</span></div>
   <div class="chat-shell">
+    <div class="char-switch" id="charSwitch">
+      <button class="char-tab on" data-c="kayoko" type="button"><img src="/assets/chat-kayoko.jpg" alt="">佳代子</button>
+      <button class="char-tab" data-c="nazuna" type="button"><img src="/assets/chat-nazuna.jpg" alt="">七草荠</button>
+    </div>
     <div class="chat-head">
-      <img class="chat-avatar" src="/assets/kayoko-portrait.png" alt="鬼方佳代子">
+      <img class="chat-avatar" id="chatAvatar" src="/assets/chat-kayoko.jpg" alt="鬼方佳代子">
       <div class="chat-id">
-        <div class="chat-name">鬼方佳代子 <span class="chat-hp">&#10022;</span></div>
-        <div class="chat-status"><span class="dot"></span>在线 · 便利屋68</div>
+        <div class="chat-name"><span id="chatName">鬼方佳代子</span> <span class="chat-hp">&#10022;</span></div>
+        <div class="chat-status"><span class="dot"></span><span id="chatStatus">在线 · 便利屋68</span></div>
       </div>
     </div>
     <div class="chat-log" id="chatLog" role="log"><div class="chat-empty" id="chatEmpty">
@@ -304,52 +319,61 @@ article.post img{border:1px solid var(--line)}
 <script>
 (function(){
   var END = "/api/chat";
-  var box = document.getElementById("chatBox"), btn = document.getElementById("chatSend"),
-      log = document.getElementById("chatLog"), empty = document.getElementById("chatEmpty");
-  var msgs = [];
-  var busy = false;
-  function el(cls, txt){
-    var d = document.createElement("div"); d.className = cls;
-    if(txt) d.textContent = txt; return d;
-  }
-  function addBubble(role, txt){
+  var CHARS = {
+    kayoko: { avatar:"/assets/chat-kayoko.jpg", name:"鬼方佳代子", status:"在线 · 便利屋68",
+      empty:"……嗯，有什么事？（我是鬼方佳代子，便利屋68的。）" },
+    nazuna: { avatar:"/assets/chat-nazuna.jpg", name:"七草荠", status:"在线 · 带班女仆",
+      empty:"……啊，主人来啦。好困，说点什么？" }
+  };
+  var box=document.getElementById("chatBox"), btn=document.getElementById("chatSend"),
+      log=document.getElementById("chatLog"), empty=document.getElementById("chatEmpty"),
+      avatar=document.getElementById("chatAvatar"), nameEl=document.getElementById("chatName"),
+      statusEl=document.getElementById("chatStatus"), sw=document.getElementById("charSwitch");
+  var current="kayoko", msgs=[], busy=false;
+  function el(cls,txt){ var d=document.createElement("div"); d.className=cls; if(txt) d.textContent=txt; return d; }
+  function addBubble(role,txt){
     if(empty) empty.remove();
-    var row = el("msg " + (role === "user" ? "me" : "kayo"));
-    var b = el("bubble"); b.textContent = txt;
-    row.appendChild(b); log.appendChild(row);
-    log.scrollTop = log.scrollHeight;
+    var row=el("msg "+(role==="user"?"me":"bot"));
+    var b=el("bubble"); b.textContent=txt; row.appendChild(b); log.appendChild(row);
+    log.scrollTop=log.scrollHeight;
   }
-  function busyKayo(){
-    var row = el("msg kayo"); var b = el("bubble spin");
-    b.textContent = "……"; row.appendChild(b); log.appendChild(row);
-    log.scrollTop = log.scrollHeight; return row;
+  function busyBubble(){
+    var row=el("msg bot"); var b=el("bubble spin"); b.textContent="……";
+    row.appendChild(b); log.appendChild(row); log.scrollTop=log.scrollHeight; return row;
   }
-  function forget(){
-    msgs = []; while(log.firstChild) log.removeChild(log.firstChild);
-    var e = el("chat-empty"); e.textContent = "……（对话已重置）"; log.appendChild(e);
+  function reset(text){
+    msgs=[]; while(log.firstChild) log.removeChild(log.firstChild);
+    var e=el("chat-empty"); e.textContent=text; log.appendChild(e); empty=e;
+  }
+  function setChar(id){
+    if(!CHARS[id] || id===current) return;
+    current=id; var c=CHARS[id];
+    avatar.src=c.avatar; avatar.alt=c.name; nameEl.textContent=c.name; statusEl.textContent=c.status;
+    var tabs=sw.querySelectorAll(".char-tab");
+    for(var i=0;i<tabs.length;i++) tabs[i].classList.toggle("on", tabs[i].getAttribute("data-c")===id);
+    reset(c.empty);
   }
   function send(){
-    var v = box.value.trim(); if(!v || busy) return;
-    box.value = ""; addBubble("user", v); msgs.push({ role: "user", content: v });
-    busy = true; btn.disabled = true;
-    // 第一次发送附带会话重置标记，避免历史无限堆积
-    var spin = busyKayo();
-    fetch(END, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: msgs })
-    }).then(function(r){ return r.json(); }).then(function(j){
+    var v=box.value.trim(); if(!v || busy) return;
+    box.value=""; addBubble("user",v); msgs.push({role:"user",content:v});
+    busy=true; btn.disabled=true;
+    var spin=busyBubble();
+    fetch(END,{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({ messages:msgs, character:current })
+    }).then(function(r){return r.json();}).then(function(j){
       spin.remove();
-      var reply = (j && j.reply) ? j.reply : "（……信号不好，没听清。再说一遍？）";
-      addBubble("kayo", reply); msgs.push({ role: "assistant", content: reply });
+      var reply=(j&&j.reply)?j.reply:"（……信号不好，再说一遍？）";
+      addBubble("bot",reply); msgs.push({role:"assistant",content:reply});
     }).catch(function(){
-      spin.remove(); addBubble("kayo", "……唔，连接不上。重试一下？");
-    }).finally(function(){
-      busy = false; btn.disabled = false; box.focus();
-    });
+      spin.remove(); addBubble("bot","……唔，连接不上。重试一下？");
+    }).finally(function(){ busy=false; btn.disabled=false; box.focus(); });
   }
-  btn.addEventListener("click", send);
-  box.addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); send(); } });
+  sw.addEventListener("click",function(e){
+    var t=e.target.closest?e.target.closest(".char-tab"):null;
+    if(t && !busy) setChar(t.getAttribute("data-c"));
+  });
+  btn.addEventListener("click",send);
+  box.addEventListener("keydown",function(e){ if(e.key==="Enter"){ e.preventDefault(); send(); } });
 })();
 </script>
 </main>
