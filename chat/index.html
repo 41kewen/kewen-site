@@ -417,8 +417,8 @@ article.post img{border:1px solid var(--line)}
   function close(){ overlay.classList.remove("open"); }
   function setMode(m){
     mode=m; mErr.textContent=""; mUser.value=""; mPass.value="";
-    if(m==="login"){ mKicker.textContent="// 登录"; mSubmit.textContent="登录"; mSwitch.innerHTML="没有账号？<a href="javascript:void 0">立即注册</a>"; }
-    else { mKicker.textContent="// 注册"; mSubmit.textContent="注册"; mSwitch.innerHTML="已有账号？<a href="javascript:void 0">去登录</a>"; }
+    if(m==="login"){ mKicker.textContent="// 登录"; mSubmit.textContent="登录"; mSwitch.innerHTML='没有账号？<a href="javascript:void 0">立即注册</a>'; }
+    else { mKicker.textContent="// 注册"; mSubmit.textContent="注册"; mSwitch.innerHTML='已有账号？<a href="javascript:void 0">去登录</a>'; }
     var a=mSwitch.querySelector("a"); if(a) a.addEventListener("click",function(){ setMode(mode==="login"?"register":"login"); });
   }
   function submit(){
