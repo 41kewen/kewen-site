@@ -270,6 +270,38 @@ article.post img{border:1px solid var(--line)}
 .chat-send:disabled{opacity:.4;cursor:default}
 .chat-hint{text-align:center;font-size:.62rem;color:var(--muted);font-family:var(--font-mono);
   letter-spacing:.05em;padding:.5rem 1rem .7rem}
+.chat-meta{margin-left:auto;display:flex;align-items:center;gap:.55rem}
+.chat-user{font-family:var(--font-mono);font-size:.68rem;color:var(--muted);letter-spacing:.04em}
+.save-btn{background:none;border:1px solid var(--violet);color:var(--violet-bright);cursor:pointer;
+  font-family:var(--font-mono);font-size:.72rem;letter-spacing:.06em;padding:.38rem .65rem;border-radius:8px;transition:all .2s}
+.save-btn:hover{background:rgba(126,43,214,.12)}
+.chat-logout{background:none;border:1px solid var(--line);color:var(--muted);cursor:pointer;
+  font-family:var(--font-mono);font-size:.68rem;padding:.3rem .5rem;border-radius:7px;transition:all .2s}
+.chat-logout:hover{color:var(--fg);border-color:var(--violet-dim)}
+.chat-toast{position:fixed;left:50%;bottom:2rem;transform:translateX(-50%) translateY(10px);
+  background:var(--surface2);border:1px solid var(--violet-dim);color:var(--fg);font-size:.8rem;
+  padding:.6rem 1rem;border-radius:9px;opacity:0;pointer-events:none;transition:all .25s;z-index:2100}
+.chat-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.modal-overlay{display:none;position:fixed;inset:0;z-index:3000;place-items:center;
+  background:rgba(5,5,7,.72);backdrop-filter:blur(4px)}
+.modal-overlay.open{display:grid}
+.modal{position:relative;width:min(360px,92vw);background:var(--surface);border:1px solid var(--line);
+  border-radius:14px;padding:1.5rem 1.5rem 1.3rem}
+.modal-close{position:absolute;top:.7rem;right:.9rem;background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem}
+.modal-close:hover{color:var(--fg)}
+.modal-kicker{font-family:var(--font-mono);color:var(--violet-bright);font-size:.72rem;letter-spacing:.3em;margin-bottom:1.1rem}
+.modal-field{display:block;margin-bottom:.85rem}
+.modal-field span{display:block;font-family:var(--font-mono);font-size:.7rem;color:var(--muted);letter-spacing:.08em;margin-bottom:.35rem}
+.modal-field input{width:100%;background:none;border:1px solid var(--line);border-radius:9px;
+  padding:.6rem .8rem;color:var(--fg);font-size:.95rem;font-family:var(--font-sans)}
+.modal-field input:focus{outline:none;border-color:var(--violet)}
+.modal-err{color:#e05656;font-size:.78rem;min-height:1.05rem;margin:.1rem 0 .45rem}
+.modal-submit{width:100%;background:var(--violet);color:#fff;border:none;border-radius:9px;
+  padding:.65rem;font-size:.92rem;cursor:pointer;transition:all .2s}
+.modal-submit:hover{background:var(--violet-bright)}
+.modal-submit:disabled{opacity:.5;cursor:default}
+.modal-switch{text-align:center;font-size:.78rem;color:var(--muted);margin-top:1rem}
+.modal-switch a{color:var(--violet-bright);cursor:pointer}
 /* footer */
 .site-footer{border-top:1px solid var(--line);margin-top:5rem;
   padding:2.2rem clamp(1.4rem,6vw,4rem);display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;
@@ -305,6 +337,7 @@ article.post img{border:1px solid var(--line)}
         <div class="chat-name"><span id="chatName">鬼方佳代子</span> <span class="chat-hp">&#10022;</span></div>
         <div class="chat-status"><span class="dot"></span><span id="chatStatus">在线 · 便利屋68</span></div>
       </div>
+      <div class="chat-meta" id="chatMeta"></div>
     </div>
     <div class="chat-log" id="chatLog" role="log"><div class="chat-empty" id="chatEmpty">
       ……嗯，有什么事？（我是鬼方佳代子，便利屋68的。）
@@ -313,37 +346,99 @@ article.post img{border:1px solid var(--line)}
       <input id="chatBox" type="text" autocomplete="off" placeholder="说点什么……" maxlength="500">
       <button id="chatSend" class="chat-send" aria-label="发送">&#10148;</button>
     </div>
-    <div class="chat-hint">&#9432; 回复由 DeepSeek 生成，可能慢几秒</div>
+    <div class="chat-hint">&#9432; 回复由 DeepSeek 生成，可能慢几秒 · 登录后可保存聊天记录</div>
   </div>
+  <div class="chat-toast" id="chatToast"></div>
 </section>
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <button class="modal-close" id="modalClose" type="button" aria-label="关闭">&#10005;</button>
+    <p class="modal-kicker" id="modalKicker">// 登录</p>
+    <label class="modal-field"><span>用户名</span><input id="mUser" type="text" autocomplete="username" maxlength="20"></label>
+    <label class="modal-field"><span>密码</span><input id="mPass" type="password" autocomplete="current-password" maxlength="72"></label>
+    <p class="modal-err" id="mErr"></p>
+    <button class="modal-submit" id="mSubmit" type="button">登录</button>
+    <p class="modal-switch" id="mSwitch"></p>
+  </div>
+</div>
 <script>
 (function(){
-  var END = "/api/chat";
-  var CHARS = {
-    kayoko: { avatar:"/assets/chat-kayoko.jpg", name:"鬼方佳代子", status:"在线 · 便利屋68",
-      empty:"……嗯，有什么事？（我是鬼方佳代子，便利屋68的。）" },
-    nazuna: { avatar:"/assets/chat-nazuna.jpg", name:"七草荠", status:"在线 · 夜行性",
-      empty:"……夜安的。这么晚还醒着？说点什么，我听着。" }
+  var END="/api/chat", REG="/api/auth/register", LOGIN="/api/auth/login", HIST="/api/history";
+  var CHARS={
+    kayoko:{avatar:"/assets/chat-kayoko.jpg", name:"鬼方佳代子", status:"在线 · 便利屋68",
+      empty:"……嗯，有什么事？（我是鬼方佳代子，便利屋68的。）"},
+    nazuna:{avatar:"/assets/chat-nazuna.jpg", name:"七草荠", status:"在线 · 夜行性",
+      empty:"……夜安的。这么晚还醒着？说点什么，我听着。"}
   };
   var box=document.getElementById("chatBox"), btn=document.getElementById("chatSend"),
       log=document.getElementById("chatLog"), empty=document.getElementById("chatEmpty"),
       avatar=document.getElementById("chatAvatar"), nameEl=document.getElementById("chatName"),
-      statusEl=document.getElementById("chatStatus"), sw=document.getElementById("charSwitch");
-  var current="kayoko", msgs=[], busy=false;
+      statusEl=document.getElementById("chatStatus"), sw=document.getElementById("charSwitch"),
+      meta=document.getElementById("chatMeta"), toast=document.getElementById("chatToast"),
+      overlay=document.getElementById("modalOverlay"), mUser=document.getElementById("mUser"),
+      mPass=document.getElementById("mPass"), mErr=document.getElementById("mErr"),
+      mSubmit=document.getElementById("mSubmit"), mKicker=document.getElementById("modalKicker"),
+      mSwitch=document.getElementById("mSwitch"), mClose=document.getElementById("modalClose");
+  var current="kayoko", msgs=[], busy=false, mode="login";
+  var token=localStorage.getItem("kewen_token")||"", user=localStorage.getItem("kewen_user")||"";
+  function esc(s){ return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+  function showT(t){ toast.textContent=t; toast.classList.add("show"); clearTimeout(showT._t); showT._t=setTimeout(function(){toast.classList.remove("show");},2000); }
   function el(cls,txt){ var d=document.createElement("div"); d.className=cls; if(txt) d.textContent=txt; return d; }
   function addBubble(role,txt){
     if(empty) empty.remove();
-    var row=el("msg "+(role==="user"?"me":"bot"));
-    var b=el("bubble"); b.textContent=txt; row.appendChild(b); log.appendChild(row);
-    log.scrollTop=log.scrollHeight;
+    var row=el("msg "+(role==="user"?"me":"bot")), b=el("bubble"); b.textContent=txt;
+    row.appendChild(b); log.appendChild(row); log.scrollTop=log.scrollHeight;
   }
-  function busyBubble(){
-    var row=el("msg bot"); var b=el("bubble spin"); b.textContent="……";
-    row.appendChild(b); log.appendChild(row); log.scrollTop=log.scrollHeight; return row;
-  }
+  function busyBubble(){ var row=el("msg bot"), b=el("bubble spin"); b.textContent="……"; row.appendChild(b); log.appendChild(row); log.scrollTop=log.scrollHeight; return row; }
   function reset(text){
     msgs=[]; while(log.firstChild) log.removeChild(log.firstChild);
     var e=el("chat-empty"); e.textContent=text; log.appendChild(e); empty=e;
+  }
+  function renderMsgs(arr){
+    reset(CHARS[current].empty);
+    for(var i=0;i<arr.length;i++){ if(empty) empty.remove(); addBubble(arr[i].role==="user"?"user":"bot", arr[i].content); }
+  }
+  function loadHist(cb){
+    if(!token){ reset(CHARS[current].empty); cb&&cb([]); return; }
+    fetch(HIST+"?character="+encodeURIComponent(current),{headers:{Authorization:"Bearer "+token}})
+      .then(function(r){return r.json();}).then(function(j){ cb&&cb((j&&Array.isArray(j.messages))?j.messages:[]); })
+      .catch(function(){ cb&&cb([]); });
+  }
+  function updateAuthUI(){
+    meta.textContent="";
+    if(token && user){
+      var b1=el("chat-user"); b1.textContent="已登录 · "+user; meta.appendChild(b1);
+      var b2=el("chat-logout"); b2.textContent="退出"; b2.addEventListener("click",logout); meta.appendChild(b2);
+    } else {
+      var s=el("save-btn"); s.textContent="保存聊天记录"; s.addEventListener("click",function(){ setMode("login"); open(); }); meta.appendChild(s);
+    }
+  }
+  function open(){ overlay.classList.add("open"); mUser.focus(); }
+  function close(){ overlay.classList.remove("open"); }
+  function setMode(m){
+    mode=m; mErr.textContent=""; mUser.value=""; mPass.value="";
+    if(m==="login"){ mKicker.textContent="// 登录"; mSubmit.textContent="登录"; mSwitch.innerHTML="没有账号？<a href="javascript:void 0">立即注册</a>"; }
+    else { mKicker.textContent="// 注册"; mSubmit.textContent="注册"; mSwitch.innerHTML="已有账号？<a href="javascript:void 0">去登录</a>"; }
+    var a=mSwitch.querySelector("a"); if(a) a.addEventListener("click",function(){ setMode(mode==="login"?"register":"login"); });
+  }
+  function submit(){
+    var u=mUser.value.trim(), p=mPass.value; if(!u||!p){ mErr.textContent="用户名和密码都填一下"; return; }
+    mErr.textContent=""; mSubmit.disabled=true;
+    fetch(mode==="login"?LOGIN:REG,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:u,password:p})})
+      .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});})
+      .then(function(x){
+        if(x.ok && x.j && x.j.token){
+          token=x.j.token; user=x.j.username; localStorage.setItem("kewen_token",token); localStorage.setItem("kewen_user",user);
+          close(); updateAuthUI(); showT("已登录 "+user+" · 自动保存开启"); loadHist(function(a){ renderMsgs(a); });
+        } else {
+          var e=x.j&&x.j.error;
+          mErr.textContent = e==="exists"?"该用户名已被注册" : e==="bad_username"?"用户名需 2~20 位字母/数字/下划线" : e==="bad_password"?"密码至少 6 位" : e==="invalid"?"用户名或密码不对" : "登录失败，稍后重试";
+        }
+      }).catch(function(){ mErr.textContent="网络错误，稍后重试"; }).finally(function(){ mSubmit.disabled=false; });
+  }
+  function logout(){
+    token=""; user=""; localStorage.removeItem("kewen_token"); localStorage.removeItem("kewen_user");
+    updateAuthUI(); reset(CHARS[current].empty); showT("已退出登录");
   }
   function setChar(id){
     if(!CHARS[id] || id===current) return;
@@ -351,29 +446,31 @@ article.post img{border:1px solid var(--line)}
     avatar.src=c.avatar; avatar.alt=c.name; nameEl.textContent=c.name; statusEl.textContent=c.status;
     var tabs=sw.querySelectorAll(".char-tab");
     for(var i=0;i<tabs.length;i++) tabs[i].classList.toggle("on", tabs[i].getAttribute("data-c")===id);
-    reset(c.empty);
+    if(token){ loadHist(function(a){ renderMsgs(a); }); } else { reset(c.empty); }
   }
   function send(){
     var v=box.value.trim(); if(!v || busy) return;
     box.value=""; addBubble("user",v); msgs.push({role:"user",content:v});
     busy=true; btn.disabled=true;
     var spin=busyBubble();
-    fetch(END,{method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({ messages:msgs, character:current })
-    }).then(function(r){return r.json();}).then(function(j){
-      spin.remove();
-      var reply=(j&&j.reply)?j.reply:"（……信号不好，再说一遍？）";
-      addBubble("bot",reply); msgs.push({role:"assistant",content:reply});
-    }).catch(function(){
-      spin.remove(); addBubble("bot","……唔，连接不上。重试一下？");
-    }).finally(function(){ busy=false; btn.disabled=false; box.focus(); });
+    var body={ messages:msgs, character:current };
+    if(token) body.token=token;
+    fetch(END,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
+      .then(function(r){return r.json();}).then(function(j){
+        spin.remove();
+        var reply=(j&&j.reply)?j.reply:"（……信号不好，再说一遍？）";
+        addBubble("bot",reply); msgs.push({role:"assistant",content:reply});
+      }).catch(function(){ spin.remove(); addBubble("bot","……唔，连接不上。重试一下？"); })
+      .finally(function(){ busy=false; btn.disabled=false; box.focus(); });
   }
-  sw.addEventListener("click",function(e){
-    var t=e.target.closest?e.target.closest(".char-tab"):null;
-    if(t && !busy) setChar(t.getAttribute("data-c"));
-  });
+  sw.addEventListener("click",function(e){ var t=e.target.closest?e.target.closest(".char-tab"):null; if(t && !busy) setChar(t.getAttribute("data-c")); });
+  mSubmit.addEventListener("click",submit);
+  mClose.addEventListener("click",close);
+  mPass.addEventListener("keydown",function(e){ if(e.key==="Enter"){ e.preventDefault(); submit(); } });
   btn.addEventListener("click",send);
   box.addEventListener("keydown",function(e){ if(e.key==="Enter"){ e.preventDefault(); send(); } });
+  updateAuthUI();
+  if(token) loadHist(function(a){ renderMsgs(a); });
 })();
 </script>
 </main>

@@ -1,6 +1,8 @@
 // Vercel serverless 版聊天代理：/api/chat
 // DeepSeek key 从环境变量 DEEPSEEK_KEY 读取（在 Vercel 控制台设置），不进代码。
-// 人物：鬼方佳代子（便利屋68）/ 七草荠（带班女仆）。请求带 character 字段切换人设。
+// 人物：鬼方佳代子（便利屋68）/ 七草荠（彻夜之歌吸血鬼七草ナズナ）。请求带 character 字段切换人设。
+
+import { getUserFromToken, saveHistory } from "./_lib/store.js";
 
 const PERSONAS = {
   kayoko: {
@@ -126,6 +128,8 @@ export default async function handler(req, res) {
   let messages = Array.isArray(body) ? body : (body && body.messages);
   let character = (body && typeof body.character === 'string') ? body.character : DEFAULT_CHAR;
   const persona = (PERSONAS[character] || PERSONAS[DEFAULT_CHAR]).persona;
+  const token = (body && typeof body.token === 'string') ? body.token : '';
+  const username = await getUserFromToken(token);
 
   if (!Array.isArray(messages) || !messages.length) {
     res.status(400).json({ error: 'bad_request' });
@@ -134,7 +138,13 @@ export default async function handler(req, res) {
 
   try {
     const reply = await chat(messages, persona);
-    res.status(200).json({ reply });
+    let saved = false;
+    if (username) {
+      const withReply = messages.concat([{ role: 'assistant', content: reply }]);
+      await saveHistory(username, character, withReply);
+      saved = true;
+    }
+    res.status(200).json({ reply, saved });
   } catch (err) {
     res.status(502).json({ error: String(err.message || err) });
   }
