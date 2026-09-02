@@ -12,29 +12,33 @@ function readToken(req) {
 }
 
 export default async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Headers", "content-type");
-  if (req.method === "OPTIONS") { res.status(204).end(); return; }
+  try {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Headers", "content-type");
+    if (req.method === "OPTIONS") { res.status(204).end(); return; }
 
-  const username = await getUserFromToken(readToken(req));
-  if (!username) { res.status(401).json({ error: "unauthorized" }); return; }
+    const username = await getUserFromToken(readToken(req));
+    if (!username) { res.status(401).json({ error: "unauthorized" }); return; }
 
-  const character = (req.method === "GET"
-    ? (req.query && req.query.character)
-    : (req.body && req.body.character)) || DEFAULT_CHAR;
+    const character = (req.method === "GET"
+      ? (req.query && req.query.character)
+      : (req.body && req.body.character)) || DEFAULT_CHAR;
 
-  if (req.method === "GET") {
-    const messages = await loadHistory(username, character);
-    res.status(200).json({ messages, character });
-    return;
+    if (req.method === "GET") {
+      const messages = await loadHistory(username, character);
+      res.status(200).json({ messages, character });
+      return;
+    }
+
+    if (req.method === "POST") {
+      const messages = Array.isArray(req.body && req.body.messages) ? req.body.messages : [];
+      await saveHistory(username, character, messages);
+      res.status(200).json({ saved: true });
+      return;
+    }
+
+    res.status(405).json({ error: "method_not_allowed" });
+  } catch (e) {
+    res.status(500).json({ error: String((e && e.stack) || e) });
   }
-
-  if (req.method === "POST") {
-    const messages = Array.isArray(req.body && req.body.messages) ? req.body.messages : [];
-    await saveHistory(username, character, messages);
-    res.status(200).json({ saved: true });
-    return;
-  }
-
-  res.status(405).json({ error: "method_not_allowed" });
 }
