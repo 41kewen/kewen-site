@@ -132,7 +132,7 @@ function extractText(j) {
     for (const m of msgs) {
       if (!m) continue;
       if (typeof m.content === 'string') { if (m.content) texts.push(m.content); continue; }
-      if (Array.isArray(m.content)) for (const c of m.content) if (c && c.type === 'text' && c.text) texts.push(c.text);
+      if (Array.isArray(m.content)) for (const c of m.content) if (c && (c.type === 'text' || c.type === 'output_text') && c.text) texts.push(c.text);
     }
     if (texts.length) return texts.join('\n').trim();
     const ot = j.output.filter((o) => o && o.type === 'output_text').map((o) => o.text || '').join('\n').trim();
