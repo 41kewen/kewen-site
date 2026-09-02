@@ -175,10 +175,10 @@ export default async function handler(req, res) {
   }
 
   try {
-    let reply, searched = false, searchError = '';
+    let reply, searched = false;
     if (allowSearch) {
       try { reply = await chatWithSearch(messages, persona); searched = true; }
-      catch (e) { searchError = String((e && e.message) || e); reply = await chatFallback(messages, persona); }
+      catch (e) { reply = await chatFallback(messages, persona); }
     } else {
       reply = await chatFallback(messages, persona);
     }
@@ -189,7 +189,7 @@ export default async function handler(req, res) {
       await saveHistory(username, character, withReply);
       saved = true;
     }
-    res.status(200).json({ reply, saved, search: allowSearch ? (searched ? 'ok' : 'fallback') : 'off', search_error: searchError });
+    res.status(200).json({ reply, saved, search: allowSearch ? (searched ? 'ok' : 'fallback') : 'off' });
   } catch (err) {
     res.status(502).json({ error: String(err.message || err) });
   }
