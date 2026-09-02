@@ -39,6 +39,6 @@ export default async function handler(req, res) {
 
     res.status(405).json({ error: "method_not_allowed" });
   } catch (e) {
-    res.status(500).json({ error: String((e && e.stack) || e) });
+    res.status(500).json({ error: String((e && e.message) || e) });
   }
 }
