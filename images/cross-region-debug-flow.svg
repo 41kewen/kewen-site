@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="760" viewBox="0 0 1400 760" role="img" aria-labelledby="title desc">
+  <title id="title">跨地区访问问题的分层排查顺序</title>
+  <desc id="desc">依次检查 DNS、IPv4 与 IPv6、TCP 与 TLS、HTTP、边缘与源站身份、动态 API；每一层都通过后再判断整体可用性。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#8f7ee7"/>
+    </marker>
+    <style>
+      .bg{fill:#0a0a0c}.box{fill:#141219;stroke:#4b4558;stroke-width:2}
+      .num{fill:#8f7ee7;font:500 24px system-ui,-apple-system,"Segoe UI",sans-serif}
+      .title{fill:#f3eee5;font:500 30px system-ui,-apple-system,"Segoe UI",sans-serif}
+      .body{fill:#bdb6c8;font:400 20px system-ui,-apple-system,"Segoe UI",sans-serif}
+      .code{fill:#cfcae8;font:400 18px ui-monospace,SFMono-Regular,Consolas,monospace}
+      .heading{fill:#f3eee5;font:500 34px system-ui,-apple-system,"Segoe UI",sans-serif}
+      .line{fill:none;stroke:#8f7ee7;stroke-width:3;marker-end:url(#arrow)}
+      .result{fill:#17151e;stroke:#5f9f79;stroke-width:2}.ok{fill:#83d4a2;font:500 21px system-ui,-apple-system,"Segoe UI",sans-serif}
+      .note{fill:#aaa3b5;font:400 19px system-ui,-apple-system,"Segoe UI",sans-serif}
+    </style>
+  </defs>
+
+  <rect class="bg" width="1400" height="760"/>
+  <text class="heading" x="50" y="55">跨地区访问：按网络层逐项排查</text>
+
+  <rect class="box" x="50" y="100" width="380" height="180"/>
+  <text class="num" x="80" y="140">01</text>
+  <text class="title" x="80" y="182">DNS</text>
+  <text class="body" x="80" y="220">记录是否正确、不同解析器是否一致</text>
+  <text class="code" x="80" y="252">nslookup domain 1.1.1.1</text>
+
+  <rect class="box" x="510" y="100" width="380" height="180"/>
+  <text class="num" x="540" y="140">02</text>
+  <text class="title" x="540" y="182">IPv4 / IPv6</text>
+  <text class="body" x="540" y="220">分别验证地址族，避免双栈互相掩盖</text>
+  <text class="code" x="540" y="252">curl -4I · curl -6I</text>
+
+  <rect class="box" x="970" y="100" width="380" height="180"/>
+  <text class="num" x="1000" y="140">03</text>
+  <text class="title" x="1000" y="182">TCP / TLS</text>
+  <text class="body" x="1000" y="220">检查 443、证书域名与握手结果</text>
+  <text class="code" x="1000" y="252">HTTPS handshake</text>
+
+  <path class="line" d="M430 190 H510"/>
+  <path class="line" d="M890 190 H970"/>
+  <path class="line" d="M1160 280 V350"/>
+
+  <rect class="box" x="970" y="350" width="380" height="180"/>
+  <text class="num" x="1000" y="390">04</text>
+  <text class="title" x="1000" y="432">HTTP</text>
+  <text class="body" x="1000" y="470">状态码、重定向链与缓存策略</text>
+  <text class="code" x="1000" y="502">308 → HTTPS · 200 OK</text>
+
+  <rect class="box" x="510" y="350" width="380" height="180"/>
+  <text class="num" x="540" y="390">05</text>
+  <text class="title" x="540" y="432">边缘 / 源站</text>
+  <text class="body" x="540" y="470">通过响应头确认请求实际经过的平台</text>
+  <text class="code" x="540" y="502">cf-ray · x-vercel-id</text>
+
+  <rect class="box" x="50" y="350" width="380" height="180"/>
+  <text class="num" x="80" y="390">06</text>
+  <text class="title" x="80" y="432">动态 API</text>
+  <text class="body" x="80" y="470">静态页面正常后，单独验证接口</text>
+  <text class="code" x="80" y="502">/api/* → 200</text>
+
+  <path class="line" d="M970 440 H890"/>
+  <path class="line" d="M510 440 H430"/>
+  <path class="line" d="M240 530 V590"/>
+
+  <rect class="result" x="50" y="590" width="1300" height="105"/>
+  <text class="ok" x="80" y="632">当前检查结果：HTTPS、IPv4、IPv6、首页与动态 API 均正常。</text>
+  <text class="note" x="80" y="670">单点测试不等于全球可用；正式判断仍需要多个地区的持续探测。</text>
+</svg>

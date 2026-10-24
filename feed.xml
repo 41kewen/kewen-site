@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0"><channel>
   <title>KEWEN</title>
-  <link>http://kewen.moe/</link>
+  <link>https://kewen.moe/</link>
   <description>深夜个人博客 — 日常、猫、技术笔记。看板娘：鬼方佳代子。</description>
   <language>zh-CN</language>
-
+    <item>
+      <title>家里云建站如何用 Cloudflare + Vercel绕过⏰备案，且能让海外用户访问</title>
+      <link>https://kewen.moe/posts/moving-off-mainland-origin/</link>
+      <guid isPermaLink="true">https://kewen.moe/posts/moving-off-mainland-origin/</guid>
+      <pubDate>Sun, 13 Sep 2026 16:00:00 GMT</pubDate>
+      <description>我的博客原本跑在家里的服务器上，后来迁到 Cloudflare + Vercel。这里记录完整做法，也解释为什么海外访问恢复了，以及“绕过备案”到底绕过了什么。</description>
+    </item>
 </channel></rss>
